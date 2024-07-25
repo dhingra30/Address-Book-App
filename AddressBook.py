@@ -22,7 +22,7 @@ class AddressBookApp(Tk):
         self.display_contact = Listbox(self, bg="black", fg="white", width=60, height=20, font=FONT2)
         self.display_contact.grid(column=1, row=1, rowspan=4, padx=20, pady=20)
 
-        self.contacts = ""
+        self.contacts = []
         self.setup_contact_display()
 
         self.selected_item = ""
@@ -44,11 +44,17 @@ class AddressBookApp(Tk):
             self.contacts = df.to_dict('records')
 
         except FileNotFoundError:
-            self.contacts = [{'Name': 'No Contact Added'}]
+            pass
 
-        for index, item in enumerate(self.contacts):
-            data = item['Name']
-            self.display_contact.insert(index, data)
+        # Clearing existing items from the listbox
+        self.display_contact.delete(0, END)
+
+        if not self.contacts:
+            self.display_contact.insert(0, 'No Contact Added')
+        else:
+            for index, item in enumerate(self.contacts):
+                data = item['Name']
+                self.display_contact.insert(index, data)
 
     def get_selected_contact(self):
         for index in self.display_contact.curselection():
@@ -90,10 +96,14 @@ class AddressBookApp(Tk):
         if not edit_contact:
             messagebox.showerror("No contact selected", "Please select a contact card to edit")
         else:
-            df = pandas.read_csv('data.csv')
-            df = df.to_dict()
-            print(df)
-            print(index)
+            try:
+                df = pandas.read_csv('data.csv')
+                df = df.to_dict()
+                print(df)
+                print(index)
+            except FileNotFoundError:
+                messagebox.showerror("Contact list empty", "There are no contacts in the address book yet")
+                return
 
             for labels in self.labels:
                 print(df[labels][index])
@@ -134,8 +144,10 @@ class AddressBookApp(Tk):
         ok_button.grid(column=0, row=8, pady=20)
         for items in self.entry_vars:
             items.set("")
+
         self.setup_contact_display()
 
 
-app = AddressBookApp()
-app.mainloop()
+if __name__ == "__main__":
+    app = AddressBookApp()
+    app.mainloop()
