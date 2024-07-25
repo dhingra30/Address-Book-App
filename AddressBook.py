@@ -1,3 +1,4 @@
+# To continue from completing edit button functionality -- mark as
 from tkinter import *
 from tkinter import messagebox
 import pandas
@@ -84,6 +85,30 @@ class AddressBookApp(Tk):
             label = Label(master, text=label_text, background=COLOR, font=FONT)
             label.grid(column=0, row=index, padx=10, pady=10)
 
+    def save_changes(self, at_index):
+        test_data = pandas.read_csv("data.csv")
+
+        test_data.drop([at_index], inplace=True)
+
+        test_data.to_csv("data.csv", mode='w+', index=False, header=True)
+        contact_data = {}
+        for index, item in enumerate(self.entry_vars, start=0):
+            contact_data.update({self.labels[index]: item.get()})
+        df = pandas.DataFrame(contact_data, index=[0])
+        df.to_csv('data.csv', mode='a', index=False, header=False)
+
+        alert_box = Toplevel(self)
+        alert_box.title("Alert")
+        alert_box.configure(background=COLOR)
+        label = Label(alert_box, text="Record edited Successfully", background=COLOR, font=FONT)
+        label.grid(column=0, row=7, padx=10, pady=10)
+        ok_button = Button(alert_box, text="ok", command=alert_box.destroy, height=2, width=10)
+        ok_button.grid(column=0, row=8, pady=20)
+        for items in self.entry_vars:
+            items.set("")
+
+        self.setup_contact_display()
+
     def on_edit_button_click(self):
 
         self.get_selected_contact()
@@ -117,7 +142,9 @@ class AddressBookApp(Tk):
             for count, element in enumerate(self.entry_vars):
                 element.set(df[self.labels[count]][index])
 
-            add_button = Button(edit_window, text="Confirm changes", height=2, width=10)
+            add_button = Button(edit_window, text="Confirm changes", command=lambda: (self.save_changes(index)),
+                                height=2,
+                                width=10)
             add_button.grid(column=0, row=7, pady=20)
 
             cancel_button = Button(edit_window, text="Cancel", height=2, width=10)
