@@ -10,8 +10,8 @@ Address Book App in Python
 * Basic Operations: Currently supports adding contacts. Edit and delete functionalities are placeholders for future enhancements.
 
 **Requirements**
-Python 3.x
-Pandas library (pip install pandas)
+1. Python 3.x
+2. Pandas library (pip install pandas)
 
 **Installation**
 1. Clone the repository:
@@ -22,8 +22,8 @@ cd address-book-app
 pip install pandas
 
 **Usage**
-Run the application:
-python address_book_app.py
+1. Run the application:
+2. python address_book_app.py
 
 **Adding a New Contact**
 1. Click on the Add button to open the "Add New Contact" window.
