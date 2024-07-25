@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import pandas
 import os
 
@@ -14,10 +15,17 @@ class AddressBookApp(Tk):
         self.configure(background=COLOR)
 
         self.setup_buttons()
-        self.setup_contact_display()
 
         self.entry_vars = [StringVar() for _ in range(5)]
         self.labels = ["Name", "Address", "Phone", "Email", "Date of Birth"]
+
+        self.display_contact = Listbox(self, bg="black", fg="white", width=60, height=20, font=FONT2)
+        self.display_contact.grid(column=1, row=1, rowspan=4, padx=20, pady=20)
+
+        self.contacts = ""
+        self.setup_contact_display()
+
+        self.selected_item = ""
 
     def setup_buttons(self):
         add_button = Button(self, text="Add", command=self.on_add_button_click, height=2, width=10)
@@ -33,16 +41,18 @@ class AddressBookApp(Tk):
 
         try:
             df = pandas.read_csv('data.csv')
-            df = df.to_dict('records')
+            self.contacts = df.to_dict('records')
 
         except FileNotFoundError:
-            df = [{'Name': 'No Contact Added'}]
+            self.contacts = [{'Name': 'No Contact Added'}]
 
-        listbox = Listbox(self, bg="black", fg="white", width=60, height=20, font=FONT2)
-        listbox.grid(column=1, row=1, rowspan=4, padx=20, pady=20)
-        for index, item in enumerate(df):
+        for index, item in enumerate(self.contacts):
             data = item['Name']
-            listbox.insert(index, data)
+            self.display_contact.insert(index, data)
+
+    def get_selected_contact(self):
+        for index in self.display_contact.curselection():
+            return self.display_contact.get(index), index
 
     def on_add_button_click(self):
         add_window = Toplevel(self)
@@ -69,8 +79,39 @@ class AddressBookApp(Tk):
             label.grid(column=0, row=index, padx=10, pady=10)
 
     def on_edit_button_click(self):
-        # Placeholder for edit functionality
-        pass
+
+        self.get_selected_contact()
+
+        try:
+            edit_contact, index = self.get_selected_contact()
+        except TypeError:
+            edit_contact = False
+            index = False
+        if not edit_contact:
+            messagebox.showerror("No contact selected", "Please select a contact card to edit")
+        else:
+            df = pandas.read_csv('data.csv')
+            df = df.to_dict()
+            print(df)
+            print(index)
+
+            for labels in self.labels:
+                print(df[labels][index])
+
+            edit_window = Toplevel(self)
+            edit_window.title("Edit Contact")
+            edit_window.configure(background=COLOR)
+            self.add_labels(edit_window)
+            self.add_entry(edit_window)
+
+            for count, element in enumerate(self.entry_vars):
+                element.set(df[self.labels[count]][index])
+
+            add_button = Button(edit_window, text="Confirm changes", height=2, width=10)
+            add_button.grid(column=0, row=7, pady=20)
+
+            cancel_button = Button(edit_window, text="Cancel", height=2, width=10)
+            cancel_button.grid(column=1, row=7, pady=20)
 
     def on_delete_button_click(self):
         # Placeholder for delete functionality
